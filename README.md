@@ -5,7 +5,7 @@ Supporting data for the paper:
 > **"Optimal Macroitem Sequences in the Precedence Constrained Knapsack Problem"**  
 > Valerio Dose, Fabio Furini, Marco Locatelli
 
-This repository contains the raw benchmark runs and aggregated tables used to
+This repository contains the raw benchmark runs used to
 produce all computational figures and tables in the paper.
 
 The solver source code is at **[fabiofurini/macroitems-cpp](https://github.com/fabiofurini/macroitems-cpp)**.
@@ -22,12 +22,7 @@ computational_results/
     ├── runs_fma.csv                ← raw runs: FMA algorithm (no heap)
     ├── runs_hima.csv               ← raw runs: HIMA algorithm (in-trees)
     ├── runs_homa.csv               ← raw runs: HOMA algorithm (out-trees)
-    ├── runs_bppf_and_hfma_medium.csv  ← raw runs: BPPF vs HFMA comparison
-    └── aggregated/
-        ├── agg_fig13_hfma_vs_fma.csv       ← Fig 13 table data
-        ├── agg_fig14_hfma_large.csv        ← Fig 14 table data
-        ├── agg_fig15_hfma_vs_bppf.csv      ← Fig 15 table data
-        └── agg_fig16_specialized_large.csv ← Fig 16 table data
+    └── runs_bppf_and_hfma_medium.csv  ← raw runs: BPPF vs HFMA comparison
 ```
 
 ---
@@ -52,11 +47,6 @@ Two benchmark sets are used:
 - **Sizes** n ∈ {100, 200, …, 1,000} (10 values)
 - **Topology**: `gen-forest` (directed forests)
 - **Algorithms tested**: HFMA, FMA, BPPF
-
-### Small test bed (HFMA/FMA scaling)
-- **Sizes** n ∈ {10, 20, …, 100} (10 values)
-- **Topology**: `gen-forest`
-- **Algorithms tested**: HFMA, FMA
 
 ### Large-sized test bed
 - **Sizes** n ∈ {10,000, 20,000, …, 100,000} (10 values)
@@ -91,7 +81,7 @@ arcs <number_of_arcs>
 - **Arcs** encode precedence constraints: arc `(i, j)` means item `i` must be selected whenever item `j` is selected.
 - **Capacity** is NOT stored in the file. It is passed to the solver at run time as a percentage of the total weight (e.g., 50% of sum of all weights).
 
-**Example** (`forest_neg_strongly_corr_dense_n0000010_s01.txt`):
+**Illustrative example** (n = 10, for format purposes only — not one of the published instances):
 ```
 n 10
 profits  1090 395 1043 395 185 281 141 624 677 -482
@@ -167,10 +157,10 @@ Each row is one run on one instance. Deduplicated: one row per (instance, algori
 
 | File | Rows | Coverage |
 |---|---|---|
-| `runs_hfma.csv` | 20 880 | all 87 sizes × 240 instances |
-| `runs_fma.csv`  |  4 562 | sizes n ≤ 1,000 (no heap needed) + toy sizes |
-| `runs_hima.csv` |  6 960 | large sizes on `gen-inforest` (29 sizes × 240) |
-| `runs_homa.csv` |  6 960 | large sizes on `gen-outforest` (29 sizes × 240) |
+| `runs_hfma.csv` | 9 600 | `gen-forest` medium + large sizes (20 × 240), plus `gen-inforest`/`gen-outforest` large sizes (10 + 10 × 240) |
+| `runs_fma.csv`  |  2 880 | `gen-forest` medium sizes (10 × 240) plus n = 10,000, 20,000 (2 × 240) |
+| `runs_hima.csv` |  2 400 | large sizes on `gen-inforest` (10 × 240) |
+| `runs_homa.csv` |  2 400 | large sizes on `gen-outforest` (10 × 240) |
 
 ---
 
@@ -191,22 +181,20 @@ One row per instance from the medium-sized `gen-forest` test bed (n ∈ {100, �
 | `hpf_cpu_ms` | BPPF CPU time (ms) |
 | `n_params` | Number of parametric breakpoints |
 
-BPPF precision: 1e-6. Macroitem counts agree on 2,152/2,160 instances tested; 8 discrepancies in `weakly_corr` with medium/dense density and 700 ≤ n ≤ 900 (numerical precision issue discussed in the paper).
+BPPF precision: 1e-6. Macroitem counts agree on 2,392/2,400 instances tested; 8 discrepancies in `weakly_corr` with medium/dense density and 700 ≤ n ≤ 900 (numerical precision issue discussed in the paper).
 
 ---
 
-## Aggregated Files (`data/aggregated/`)
+## Figures in the Paper
 
-Pre-computed means per n used directly for figures and tables in the paper.
-
-| File | Figure | Description |
+| Figure | Data | Description |
 |---|---|---|
-| `agg_fig13_hfma_vs_fma.csv` | Fig 13 | HFMA vs FMA mean CPU time, n = 10..20,000 |
-| `agg_fig14_hfma_large.csv` | Fig 14 | HFMA mean CPU time, n = 10,000..100,000 |
-| `agg_fig15_hfma_vs_bppf.csv` | Fig 15 | HFMA vs BPPF mean CPU time, n = 100..1,000 |
-| `agg_fig16_specialized_large.csv` | Fig 16 | HIMA, HOMA, speedup over HFMA, n = 10,000..100,000 |
+| Fig 12 | `runs_hfma.csv`, `runs_fma.csv` | HFMA vs FMA mean CPU time, n = 100..20,000 |
+| Fig 13 | `runs_hfma.csv` | HFMA mean CPU time, n = 10,000..100,000 |
+| Fig 14 | `runs_hima.csv`, `runs_homa.csv` | HIMA, HOMA, speedup over HFMA, n = 10,000..100,000 |
+| Fig 15 | `runs_bppf_and_hfma_medium.csv` | HFMA vs BPPF mean CPU time, n = 100..1,000 |
 
-To reproduce aggregated files from raw runs:
+To compute the mean CPU time per $n$ from any raw run file:
 
 ```python
 import pandas as pd
@@ -224,8 +212,8 @@ agg.columns = ["n", "hfma_mean_ms"]
 - **HIMA** (in-forests) and **HOMA** (out-forests): O(n log n)
 
 Speedup of specialized variants over HFMA on the respective topology:
-- **HIMA** vs HFMA on in-forests: **7.7×–9.9×**
-- **HOMA** vs HFMA on out-forests: **4.1×–5.2×**
+- **HIMA** vs HFMA on in-forests: **7.5×–9.8×**
+- **HOMA** vs HFMA on out-forests: **4.3×–5.0×**
 
 ---
 
@@ -242,7 +230,7 @@ The benchmark instances are available as zip archives in the
 | [`instances_large_outforest.zip`](https://github.com/fabiofurini/macroitems-data/releases/download/v1.0/instances_large_outforest.zip) | 887 MB | 2,400 gen-outforest instances, n = 10,000..100,000 (all seeds) |
 
 Each zip contains flat files named `{topo}_{class}_{density}_n{n:07d}_s{seed:02d}.txt`.
-The instance generator `instances/gen_instances.py` reproduces all instances from scratch.
+The instance generator `scripts/gen_instances.py` reproduces all instances from scratch.
 
 ---
 
@@ -255,26 +243,32 @@ mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j
 
 **Generate all instances:**
 ```bash
-python3 instances/gen_instances.py
+python3 scripts/gen_instances.py
 ```
 
 **Run benchmarks:**
 
-Three separate runs were used for the paper:
-
 ```bash
-# Fig 13 + Fig 15: HFMA and FMA on forest instances, n = 10..1,000
-# Fig 14: HFMA on forest/inforest/outforest, n = 10,000..100,000
-# (also HIMA and HOMA on inforest/outforest for Fig 16)
-python3 report_performance/run_benchmark.py        # n = 10..1,000 (HFMA + FMA)
-python3 report_performance/run_benchmark_large.py  # n = 10,000..100,000 (HFMA + HIMA + HOMA)
+# Fig 12: HFMA and FMA on medium gen-forest instances, n = 100..1,000
+python3 scripts/run_fig12_hfma_fma.py
 
-# Fig 15: BPPF vs HFMA on medium forest instances, n = 100..1,000
+# Fig 12/13: HFMA on medium and large gen-forest instances
+python3 scripts/run_hfma_medium.py
+python3 scripts/run_hfma_large_forest.py
+
+# Fig 13: HFMA on large gen-inforest/gen-outforest instances
+python3 scripts/run_fig14_hfma_large_inout.py
+
+# Fig 14: HIMA and HOMA on large gen-inforest/gen-outforest instances
+python3 scripts/run_fig14_specialized_large.py
+
+# Fig 15: BPPF vs HFMA on medium gen-forest instances, n = 100..1,000
 # Requires the BPPF binary built from:
 #   https://github.com/hochbaumGroup/Bounded-precision-simple-parametric
-python3 PARAMETRIC_PSEUDO_FLOW/scripts/hpf_medium_batch.py
+python3 ../../CODE_PARAMETRIC_PSEUDOFLOW/scripts/hpf_medium_batch.py
 ```
 
-Raw results are written to `results/runs.csv` (HFMA/FMA/HIMA/HOMA) and
-`report_performance/timing_hpf_medium.csv` (BPPF comparison).
+Each script writes its raw output CSV(s) to `outputs/` in the corresponding
+project directory; these are the files combined into the `runs_*.csv` and
+`runs_bppf_and_hfma_medium.csv` files published in `data/`.
 
